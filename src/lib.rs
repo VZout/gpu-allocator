@@ -237,6 +237,8 @@ pub enum MemoryLocation {
     CpuToGpu,
     /// Memory useful for CPU readback of data
     GpuToCpu,
+    ///  Resizable BAR (D3D12 GPU Upload Heaps)
+    ResizableBAR,
 }
 
 #[derive(Copy, Clone, Debug)]

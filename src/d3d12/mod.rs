@@ -665,6 +665,15 @@ impl Allocator {
                     ..Default::default()
                 },
             ),
+            (
+                MemoryLocation::ResizableBAR,
+                D3D12_HEAP_PROPERTIES {
+                    Type: D3D12_HEAP_TYPE_GPU_UPLOAD,
+                    CPUPageProperty: D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
+                    MemoryPoolPreference: D3D12_MEMORY_POOL_UNKNOWN,
+                    ..Default::default()
+                },
+            ),
         ];
 
         let heap_types = if is_heap_tier1 {
