@@ -637,9 +637,23 @@ impl Allocator {
             AllocationError::Internal(format!("ID3D12Device::CheckFeatureSupport failed: {}", e))
         })?;
 
+        #[cfg(feature = "agility")]
+        let mut options16 = D3D12_FEATURE_DATA_D3D12_OPTIONS16::default();
+        #[cfg(feature = "agility")]
+        unsafe {
+            device.CheckFeatureSupport(
+                D3D12_FEATURE_D3D12_OPTIONS16,
+                <*mut D3D12_FEATURE_DATA_D3D12_OPTIONS16>::cast(&mut options16),
+                std::mem::size_of_val(&options16) as u32,
+            )
+        }
+        .map_err(|e| {
+            AllocationError::Internal(format!("ID3D12Device::CheckFeatureSupport failed: {}", e))
+        })?;
+
         let is_heap_tier1 = options.ResourceHeapTier == D3D12_RESOURCE_HEAP_TIER_1;
 
-        let heap_types = [
+        let heap_types = vec![
             (
                 MemoryLocation::GpuOnly,
                 D3D12_HEAP_PROPERTIES {
@@ -665,6 +679,7 @@ impl Allocator {
                     ..Default::default()
                 },
             ),
+            #[cfg(feature = "agility")]
             (
                 MemoryLocation::ResizableBAR,
                 D3D12_HEAP_PROPERTIES {
