@@ -2,9 +2,8 @@ use std::backtrace::BacktraceStatus;
 
 use egui::{Color32, DragValue, Rect, ScrollArea, Sense, Ui, Vec2};
 
-use crate::allocator::free_list_allocator::MemoryChunk;
-
 use super::ColorScheme;
+use crate::allocator::free_list_allocator::MemoryChunk;
 
 pub(crate) struct MemoryChunksVisualizationSettings {
     pub width_in_bytes: u64,
@@ -81,7 +80,6 @@ pub(crate) fn render_memory_chunks_ui<'a>(
                         if cursor_idx < data.len() {
                             bytes_required = data[cursor_idx].size;
                         }
-                        continue;
                     }
 
                     let bytes_used = bytes_required.min(bytes_left);
@@ -113,7 +111,7 @@ pub(crate) fn render_memory_chunks_ui<'a>(
                                 chunk.allocation_type.as_str()
                             ));
                             if let Some(name) = &chunk.name {
-                                ui.label(format!("name: {}", name));
+                                ui.label(format!("name: {name}"));
                             }
                             if settings.show_backtraces
                                 && chunk.backtrace.status() == BacktraceStatus::Captured

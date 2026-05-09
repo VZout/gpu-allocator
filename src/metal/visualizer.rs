@@ -1,7 +1,5 @@
 #![allow(clippy::new_without_default)]
 
-use windows::Win32::Graphics::Direct3D12::*;
-
 use super::Allocator;
 use crate::visualizer::{
     render_allocation_reports_ui, AllocationReportVisualizeSettings, ColorScheme,
@@ -13,7 +11,6 @@ struct AllocatorVisualizerBlockWindow {
     block_index: usize,
     settings: MemoryChunksVisualizationSettings,
 }
-
 impl AllocatorVisualizerBlockWindow {
     fn new(memory_type_index: usize, block_index: usize) -> Self {
         Self {
@@ -28,39 +25,6 @@ pub struct AllocatorVisualizer {
     selected_blocks: Vec<AllocatorVisualizerBlockWindow>,
     color_scheme: ColorScheme,
     breakdown_settings: AllocationReportVisualizeSettings,
-}
-
-fn format_heap_type(heap_type: D3D12_HEAP_TYPE) -> &'static str {
-    let names = [
-        "D3D12_HEAP_TYPE_DEFAULT_INVALID",
-        "D3D12_HEAP_TYPE_DEFAULT",
-        "D3D12_HEAP_TYPE_UPLOAD",
-        "D3D12_HEAP_TYPE_READBACK",
-        "D3D12_HEAP_TYPE_CUSTOM",
-    ];
-
-    names[heap_type.0 as usize]
-}
-
-fn format_cpu_page_property(prop: D3D12_CPU_PAGE_PROPERTY) -> &'static str {
-    let names = [
-        "D3D12_CPU_PAGE_PROPERTY_UNKNOWN",
-        "D3D12_CPU_PAGE_PROPERTY_NOT_AVAILABLE",
-        "D3D12_CPU_PAGE_PROPERTY_WRITE_COMBINE",
-        "D3D12_CPU_PAGE_PROPERTY_WRITE_BACK",
-    ];
-
-    names[prop.0 as usize]
-}
-
-fn format_memory_pool(pool: D3D12_MEMORY_POOL) -> &'static str {
-    let names = [
-        "D3D12_MEMORY_POOL_UNKNOWN",
-        "D3D12_MEMORY_POOL_L0",
-        "D3D12_MEMORY_POOL_L1",
-    ];
-
-    names[pool.0 as usize]
 }
 
 impl AllocatorVisualizer {
@@ -85,7 +49,7 @@ impl AllocatorVisualizer {
                         format!(
                             "Type: {} ({} blocks)",
                             mem_type_idx,
-                            mem_type.memory_blocks.len()
+                            mem_type.memory_blocks.len(),
                         ),
                         |ui| {
                             let mut total_block_size = 0;
@@ -102,32 +66,10 @@ impl AllocatorVisualizer {
                                 .filter(|block| block.is_some())
                                 .count();
 
-                            ui.label(format!("heap category: {:?}", mem_type.heap_category));
-                            ui.label(format!(
-                                "Heap Type: {} ({})",
-                                format_heap_type(mem_type.heap_properties.Type),
-                                mem_type.heap_properties.Type.0
-                            ));
-                            ui.label(format!(
-                                "CpuPageProperty: {} ({})",
-                                format_cpu_page_property(mem_type.heap_properties.CPUPageProperty),
-                                mem_type.heap_properties.CPUPageProperty.0
-                            ));
-                            ui.label(format!(
-                                "MemoryPoolPreference: {} ({})",
-                                format_memory_pool(mem_type.heap_properties.MemoryPoolPreference),
-                                mem_type.heap_properties.MemoryPoolPreference.0
-                            ));
+                            ui.label(format!("properties: {:?}", mem_type.heap_properties));
+                            ui.label(format!("memory type index: {}", mem_type.memory_type_index));
                             ui.label(format!("total block size: {} KiB", total_block_size / 1024));
                             ui.label(format!("total allocated:  {} KiB", total_allocated / 1024));
-                            ui.label(format!(
-                                "committed resource allocations: {}",
-                                mem_type.committed_allocations.num_allocations
-                            ));
-                            ui.label(format!(
-                                "total committed resource allocations: {} KiB",
-                                mem_type.committed_allocations.total_size
-                            ));
                             ui.label(format!("block count: {active_block_count}"));
 
                             for (block_idx, block) in mem_type.memory_blocks.iter().enumerate() {
@@ -139,7 +81,8 @@ impl AllocatorVisualizer {
                                         "allocated: {} KiB",
                                         block.sub_allocator.allocated() / 1024
                                     ));
-                                    ui.label(format!("D3D12 heap: {:?}", block.heap));
+                                    ui.label(format!("Heap: {:?}", &block.heap));
+
                                     block.sub_allocator.draw_base_info(ui);
 
                                     if block.sub_allocator.supports_visualization()
